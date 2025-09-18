@@ -3,94 +3,219 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR 코드 생성기</title>
+    <title>MBTI 새로운 조합 찾기 & QR코드 생성기</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
-            background-color: #f0f2f5;
+            padding: 20px;
+            box-sizing: border-box;
         }
+
         .container {
+            width: 100%;
+            max-width: 600px;
             background-color: white;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 30px 40px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             text-align: center;
-            width: 90%;
-            max-width: 400px;
         }
+
         h1 {
-            margin-top: 0;
-            color: #333;
+            color: #2c3e50;
+            margin-bottom: 10px;
         }
-        input[type="text"] {
-            width: calc(100% - 20px);
+
+        p {
+            color: #555;
+            margin-bottom: 30px;
+        }
+
+        .selectors {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        select {
             padding: 12px;
-            margin-bottom: 20px;
-            border: 1px solid #ccc;
+            border: 1px solid #ddd;
             border-radius: 8px;
             font-size: 16px;
+            font-family: inherit;
+            cursor: pointer;
         }
+
+        .plus {
+            font-size: 24px;
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        button {
+            background: linear-gradient(45deg, #3498db, #8e44ad);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        #result-container {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+            display: none; /* 처음에는 숨김 */
+        }
+        
+        #result-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #8e44ad;
+            margin-bottom: 10px;
+        }
+
+        #result-description {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #444;
+        }
+
         #qrcode {
+            margin-top: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 256px; /* QR 코드가 표시될 최소 높이 */
-            border: 1px solid #eee;
-            border-radius: 8px;
             padding: 10px;
+            background: white;
+            border-radius: 8px;
+            min-height: 148px; /* 128px + 20px padding */
         }
-        #qrcode img {
-            max-width: 100%;
-            height: auto;
-        }
+
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>QR 코드 생성기 📝</h1>
-        <p>아래 텍스트 상자에 URL이나 텍스트를 입력하세요.</p>
-        <input type="text" id="text-input" placeholder="여기에 텍스트를 입력하세요..." autofocus>
-        <div id="qrcode"></div>
+        <h1>🔮 MBTI 새로운 조합 찾기</h1>
+        <p>두 개의 MBTI를 선택하여 당신만의 특별한 조합을 발견하고 QR코드로 공유해보세요!</p>
+
+        <div class="selectors">
+            <select id="mbti1"></select>
+            <span class="plus">+</span>
+            <select id="mbti2"></select>
+        </div>
+
+        <button id="combine-btn">결과 확인하기!</button>
+
+        <div id="result-container">
+            <h2 id="result-title"></h2>
+            <p id="result-description"></p>
+            <div id="qrcode"></div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-
     <script>
-        const textInput = document.getElementById('text-input');
-        const qrcodeContainer = document.getElementById('qrcode');
+        const mbtiTypes = [
+            'ISTJ', 'ISFJ', 'INFJ', 'INTJ',
+            'ISTP', 'ISFP', 'INFP', 'INTP',
+            'ESTP', 'ESFP', 'ENFP', 'ENTP',
+            'ESTJ', 'ESFJ', 'ENFJ', 'ENTJ'
+        ];
 
-        // QRCode.js를 사용하여 QR 코드를 생성하는 함수
-        const generateQrCode = (text) => {
-            // QR 코드를 표시하기 전에 이전 코드를 지웁니다.
-            qrcodeContainer.innerHTML = '';
-
-            // 텍스트가 비어있지 않은 경우에만 QR 코드를 생성합니다.
-            if (text.trim() !== '') {
-                new QRCode(qrcodeContainer, {
-                    text: text,
-                    width: 256,
-                    height: 256,
-                    colorDark : "#000000",
-                    colorLight : "#ffffff",
-                    correctLevel : QRCode.CorrectLevel.H
-                });
-            }
+        // 각 MBTI 유형에 대한 핵심 특성 정의
+        const mbtiTraits = {
+            'ISTJ': { title: '현실적인 논리주의자', desc: '사실에 근거하여 체계적으로 사고하며, 책임감이 강합니다.' },
+            'ISFJ': { title: '용감한 수호자', desc: '타인에게 헌신적이며, 따뜻한 마음으로 주변을 돌봅니다.' },
+            'INFJ': { title: '선의의 옹호자', desc: '깊은 통찰력으로 사람들에게 영감을 주며, 이상을 추구합니다.' },
+            'INTJ': { title: '용의주도한 전략가', desc: '상상력이 풍부하며, 모든 일에 대해 철저한 계획을 세웁니다.' },
+            'ISTP': { title: '만능 재주꾼', desc: '대담하고 현실적인 성향으로, 다양한 도구를 능숙하게 다룹니다.' },
+            'ISFP': { title: '호기심 많은 예술가', desc: '새로운 것을 탐험하고 경험하기를 즐기는 매력적인 사람입니다.' },
+            'INFP': { title: '열정적인 중재자', desc: '상냥하고 이타적이며, 더 나은 세상을 만들고자 하는 열망이 있습니다.' },
+            'INTP': { title: '논리적인 사색가', desc: '지식을 끝없이 갈망하며, 독창적인 아이디어를 탐구합니다.' },
+            'ESTP': { title: '모험을 즐기는 사업가', desc: '명석한 두뇌와 넘치는 에너지로 주변 사람들을 즐겁게 합니다.' },
+            'ESFP': { title: '자유로운 영혼의 연예인', desc: '즉흥적이고 에너지가 넘쳐, 주변에 웃음과 활기를 불어넣습니다.' },
+            'ENFP': { title: '재기발랄한 활동가', desc: '창의적이고 사교적인 성격으로, 긍정적인 에너지를 발산합니다.' },
+            'ENTP': { title: '뜨거운 논쟁을 즐기는 변론가', desc: '지적인 도전을 즐기며, 현 상태에 의문을 제기하는 것을 두려워하지 않습니다.' },
+            'ESTJ': { title: '엄격한 관리자', desc: '사물이나 사람을 관리하는 데 뛰어난 능력을 지닌 현실적인 리더입니다.' },
+            'ESFJ': { title: '사교적인 외교관', desc: '타인을 돕는 것을 즐기며, 주변 사람들에게 인기가 많습니다.' },
+            'ENFJ': { title: '정의로운 사회운동가', desc: '카리스마와 열정으로 사람들을 이끌며, 긍정적인 영향을 미칩니다.' },
+            'ENTJ': { title: '대담한 통솔자', desc: '타고난 리더십으로, 장기적인 계획과 목표 달성을 즐깁니다.' }
         };
 
-        // 페이지가 처음 로드될 때 플레이스홀더 텍스트로 QR 코드 생성
-        generateQrCode(textInput.placeholder);
+        const mbti1Select = document.getElementById('mbti1');
+        const mbti2Select = document.getElementById('mbti2');
+        const combineBtn = document.getElementById('combine-btn');
+        const resultContainer = document.getElementById('result-container');
+        const resultTitle = document.getElementById('result-title');
+        const resultDescription = document.getElementById('result-description');
+        const qrcodeContainer = document.getElementById('qrcode');
 
-        // 사용자가 텍스트를 입력할 때마다 실시간으로 QR 코드 업데이트
-        textInput.addEventListener('input', () => {
-            generateQrCode(textInput.value);
+        // 드롭다운 메뉴에 MBTI 유형 채우기
+        mbtiTypes.forEach(type => {
+            const option1 = new Option(type, type);
+            const option2 = new Option(type, type);
+            mbti1Select.add(option1);
+            mbti2Select.add(option2);
         });
-    </script>
 
+        // 기본값 설정 (예: INFP, ENTJ)
+        mbti1Select.value = 'INFP';
+        mbti2Select.value = 'ENTJ';
+
+        // 버튼 클릭 이벤트 리스너
+        combineBtn.addEventListener('click', () => {
+            const type1 = mbti1Select.value;
+            const type2 = mbti2Select.value;
+
+            // 두 MBTI의 핵심 특성을 조합하여 새로운 제목과 설명 생성
+            const newTitle = mbtiTraits[type1].title.split(' ')[0] + " " + mbtiTraits[type2].title.split(' ')[1];
+            const newDescription = `당신은 ${mbtiTraits[type1].desc.slice(0, -1)}는 성향과, ${mbtiTraits[type2].desc.slice(0, -1)}는 성향이 결합된 특별한 사람입니다. 때로는 ${type1}의 모습으로, 때로는 ${type2}의 모습으로 세상을 다채롭게 살아갑니다.`;
+            
+            // 결과 표시
+            resultTitle.textContent = `[${type1} + ${type2}] 의 조합: "${newTitle}"`;
+            resultDescription.textContent = newDescription;
+            resultContainer.style.display = 'block';
+
+            // QR 코드 생성
+            generateQrCode(resultTitle.textContent + "\n" + newDescription);
+        });
+
+        // QR 코드 생성 함수
+        const generateQrCode = (text) => {
+            qrcodeContainer.innerHTML = ''; // 이전 QR 코드 삭제
+            new QRCode(qrcodeContainer, {
+                text: text,
+                width: 128,
+                height: 128,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+        };
+
+    </script>
 </body>
 </html>
