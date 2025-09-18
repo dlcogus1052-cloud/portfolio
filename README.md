@@ -9,3 +9,4 @@ AI, ML, DL
 # 라이브 데모 
 
 포트폴리오 사이트 : https://dlcogus1052-cloud.github.io/portfolio/
+qr 사이트 : https://dlcogus1052-cloud.github.io/portfolio/qrcode.html
