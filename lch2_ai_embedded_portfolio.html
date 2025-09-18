@@ -1,0 +1,2004 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI & 임베디드 개발자</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #4285f4;
+            --secondary-color: #34a853;
+            --tertiary-color: #fbbc04;
+            --quaternary-color: #ea4335;
+            --text-primary: #202124;
+            --text-secondary: #5f6368;
+            --text-light: rgba(255, 255, 255, 0.9);
+            --background-dark: #1a1a1a;
+            --background-darker: #0f0f0f;
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        body {
+            font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--background-dark);
+            overflow-x: hidden;
+            cursor: none;
+        }
+
+        /* Custom Cursor */
+        .cursor {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(66, 133, 244, 0.6);
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.1s ease;
+        }
+
+        .cursor-follower {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid rgba(66, 133, 244, 0.3);
+            position: fixed;
+            pointer-events: none;
+            z-index: 9998;
+            transition: all 0.3s ease;
+        }
+
+        /* Animated Background */
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(45deg, #1a1a1a, #2d2d2d, #1a1a1a);
+            background-size: 400% 400%;
+            animation: gradientShift 20s ease infinite;
+        }
+
+        .animated-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(66, 133, 244, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(234, 67, 53, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(52, 168, 83, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 60% 60%, rgba(251, 188, 4, 0.08) 0%, transparent 50%);
+            animation: float 25s ease-in-out infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0px, 0px) rotate(0deg); }
+            25% { transform: translate(30px, -30px) rotate(90deg); }
+            50% { transform: translate(-20px, 20px) rotate(180deg); }
+            75% { transform: translate(20px, 30px) rotate(270deg); }
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(26, 26, 26, 0.8);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 16px 32px;
+            transition: all 0.3s ease;
+        }
+
+        .header.scrolled {
+            background: rgba(15, 15, 15, 0.95);
+            border-bottom-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 600;
+            color: white;
+            text-decoration: none;
+            letter-spacing: -0.5px;
+            transition: all 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 40px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 400;
+            padding: 8px 20px;
+            border-radius: 24px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-links a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .nav-links a:hover::before {
+            left: 100%;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            z-index: 2;
+        }
+
+        .hero-update {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            padding: 12px 24px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            margin-bottom: 60px;
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            animation: fadeInUp 1s ease 0.2s forwards;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-update::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .hero-title {
+            font-size: 200px;
+            font-weight: 200;
+            color: white;
+            margin-bottom: 40px;
+            letter-spacing: -10px;
+            line-height: 0.8;
+            opacity: 0;
+            animation: fadeInUp 1.2s ease 0.5s forwards;
+            background: linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.7) 50%, rgba(66, 133, 244, 0.8) 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% 200%;
+            animation: fadeInUp 1.2s ease 0.5s forwards, gradientMove 8s ease-in-out infinite;
+        }
+
+        @keyframes gradientMove {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .hero-subtitle {
+            font-size: 32px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 60px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            font-weight: 300;
+            line-height: 1.4;
+            opacity: 0;
+            animation: fadeInUp 1s ease 0.8s forwards;
+        }
+
+        .hero-description {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 60px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            font-weight: 300;
+            line-height: 1.6;
+            opacity: 0;
+            animation: fadeInUp 1s ease 1s forwards;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            flex-wrap: wrap;
+            opacity: 0;
+            animation: fadeInUp 1s ease 1.2s forwards;
+        }
+
+        .btn {
+            padding: 18px 36px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.6s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            box-shadow: 0 8px 32px rgba(66, 133, 244, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-6px) scale(1.05);
+            box-shadow: 0 20px 60px rgba(66, 133, 244, 0.4);
+        }
+
+        .btn-secondary {
+            color: white;
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.6);
+            transform: translateY(-6px) scale(1.05);
+        }
+
+        /* Tech Stack Showcase */
+        .tech-showcase {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 80px;
+            opacity: 0;
+            animation: fadeInUp 1s ease 1.4s forwards;
+        }
+
+        .tech-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 12px 20px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tech-item:hover {
+            background: rgba(66, 133, 244, 0.2);
+            border-color: rgba(66, 133, 244, 0.4);
+            transform: translateY(-4px) scale(1.05);
+            color: white;
+        }
+
+        .tech-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--tertiary-color));
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .tech-item:hover::before {
+            transform: translateX(0);
+        }
+
+        /* Floating Particles */
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* About Section */
+        .about-section {
+            padding: 120px 40px;
+            background: var(--background-darker);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .about-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .about-content h2 {
+            font-size: 80px;
+            font-weight: 300;
+            color: white;
+            margin-bottom: 30px;
+            letter-spacing: -3px;
+            line-height: 0.9;
+            background: linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.6) 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .about-content p {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 25px;
+            line-height: 1.6;
+            font-weight: 300;
+        }
+
+        .about-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s ease;
+        }
+
+        .stat-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-8px);
+        }
+
+        .stat-number {
+            font-size: 48px;
+            font-weight: 600;
+            color: var(--primary-color);
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 400;
+        }
+
+        .about-visual {
+            position: relative;
+            height: 600px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 30px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .code-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(66, 133, 244, 0.1), rgba(52, 168, 83, 0.1));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Courier New', monospace;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+            white-space: pre-line;
+            overflow: hidden;
+        }
+
+        /* Projects Section */
+        .projects-section {
+            padding: 120px 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: 120px;
+            font-weight: 300;
+            color: white;
+            margin-bottom: 40px;
+            text-align: center;
+            letter-spacing: -4px;
+            line-height: 0.9;
+            background: linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.6) 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .section-subtitle {
+            font-size: 24px;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+            margin-bottom: 100px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            font-weight: 300;
+            line-height: 1.5;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 40px;
+            margin-top: 80px;
+        }
+
+        .project-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 30px;
+            padding: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+        }
+
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--tertiary-color), var(--quaternary-color));
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .project-card:hover::before {
+            transform: translateX(0);
+        }
+
+        .project-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.4);
+        }
+
+        .project-icon {
+            font-size: 60px;
+            margin-bottom: 30px;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+
+        .project-card:hover .project-icon {
+            transform: scale(1.2) rotate(5deg);
+        }
+
+        .project-title {
+            font-size: 36px;
+            font-weight: 500;
+            color: white;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+
+        .project-description {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .project-features {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+
+        .project-features li {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 16px;
+            padding: 8px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .project-features li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--secondary-color);
+            font-weight: bold;
+        }
+
+        .tech-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 40px;
+        }
+
+        .tech-tag {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 400;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .tech-tag:hover {
+            background: rgba(66, 133, 244, 0.3);
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .project-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .project-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(66, 133, 244, 0.3);
+        }
+
+        .project-link:hover {
+            color: white;
+            background: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        /* Skills Section */
+        .skills-section {
+            padding: 120px 40px;
+            background: var(--background-dark);
+            position: relative;
+        }
+
+        .skills-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            margin-top: 80px;
+        }
+
+        .skill-category {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 50px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            backdrop-filter: blur(20px);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skill-category::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            transform: translateX(-100%);
+            transition: transform 0.4s ease;
+        }
+
+        .skill-category:hover::before {
+            transform: translateX(0);
+        }
+
+        .skill-category:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-10px);
+        }
+
+        .skill-category h3 {
+            font-size: 32px;
+            font-weight: 500;
+            color: white;
+            margin-bottom: 30px;
+            letter-spacing: -1px;
+        }
+
+        .skill-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        .skill-item {
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            font-size: 16px;
+            color: white;
+            font-weight: 400;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skill-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .skill-item:hover::before {
+            left: 100%;
+        }
+
+        .skill-item:hover {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(66, 133, 244, 0.3);
+        }
+
+        /* Experience Timeline */
+        .experience-section {
+            padding: 120px 40px;
+            background: var(--background-darker);
+            position: relative;
+        }
+
+        .timeline {
+            max-width: 1000px;
+            margin: 80px auto 0;
+            position: relative;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+            transform: translateX(-50%);
+        }
+
+        .timeline-item {
+            display: flex;
+            margin-bottom: 60px;
+            position: relative;
+        }
+
+        .timeline-item:nth-child(even) {
+            flex-direction: row-reverse;
+        }
+
+        .timeline-content {
+            flex: 1;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 0 30px;
+            transition: all 0.4s ease;
+        }
+
+        .timeline-content:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-8px);
+        }
+
+        .timeline-date {
+            font-size: 14px;
+            color: var(--primary-color);
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .timeline-title {
+            font-size: 24px;
+            color: white;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .timeline-company {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 15px;
+        }
+
+        .timeline-description {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.6;
+        }
+
+        /* Contact Section */
+        .contact-section {
+            padding: 120px 40px;
+            background: var(--background-dark);
+            text-align: center;
+            position: relative;
+        }
+
+        .contact-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .contact-title {
+            font-size: 100px;
+            font-weight: 300;
+            color: white;
+            margin-bottom: 40px;
+            letter-spacing: -3px;
+            background: linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.6) 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .contact-subtitle {
+            font-size: 22px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 80px;
+            font-weight: 300;
+            line-height: 1.5;
+        }
+
+        .contact-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-bottom: 80px;
+        }
+
+        .contact-link {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            padding: 40px 30px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 30px;
+            text-decoration: none;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .contact-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.6s;
+        }
+
+        .contact-link:hover::before {
+            left: 100%;
+        }
+
+        .contact-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .contact-icon {
+            font-size: 48px;
+            transition: transform 0.3s ease;
+        }
+
+        .contact-link:hover .contact-icon {
+            transform: scale(1.2) rotate(10deg);
+        }
+
+        .contact-text {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .contact-description {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            text-align: center;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--background-darker);
+            padding: 60px 40px 40px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .footer-text {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-color);
+        }
+
+        /* Scroll Progress Bar */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--tertiary-color));
+            z-index: 10000;
+            transition: width 0.25s ease;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(60px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes particleFloat {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(60px);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .animate-on-scroll.animated {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .about-container {
+                grid-template-columns: 1fr;
+                gap: 60px;
+                text-align: center;
+            }
+            
+            .timeline::before {
+                left: 20px;
+            }
+            
+            .timeline-item {
+                padding-left: 60px;
+            }
+            
+            .timeline-item:nth-child(even) {
+                flex-direction: row;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .hero-title {
+                font-size: 160px;
+                letter-spacing: -8px;
+            }
+            
+            .section-title {
+                font-size: 90px;
+                letter-spacing: -3px;
+            }
+            
+            .contact-title {
+                font-size: 80px;
+            }
+            
+            .about-content h2 {
+                font-size: 60px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 120px;
+                letter-spacing: -6px;
+            }
+            
+            .hero-subtitle {
+                font-size: 28px;
+            }
+            
+            .hero-description {
+                font-size: 18px;
+            }
+            
+            .section-title {
+                font-size: 70px;
+                letter-spacing: -2px;
+            }
+            
+            .contact-title {
+                font-size: 60px;
+            }
+            
+            .about-content h2 {
+                font-size: 50px;
+            }
+            
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .skills-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .hero, .section, .contact-section, .about-section, .experience-section, .skills-section {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+            
+            .contact-links {
+                grid-template-columns: 1fr;
+            }
+            
+            .about-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-title {
+                font-size: 80px;
+                letter-spacing: -3px;
+            }
+            
+            .hero-subtitle {
+                font-size: 24px;
+            }
+            
+            .section-title {
+                font-size: 50px;
+            }
+            
+            .contact-title {
+                font-size: 50px;
+            }
+            
+            .about-content h2 {
+                font-size: 40px;
+            }
+            
+            .project-card, .skill-category, .timeline-content {
+                padding: 30px;
+            }
+            
+            .btn {
+                padding: 14px 28px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cursor"></div>
+    <div class="cursor-follower"></div>
+    <div class="scroll-progress"></div>
+    <div class="animated-bg"></div>
+
+    <!-- Header -->
+    <header class="header" id="header">
+        <div class="nav-container">
+            <a href="#" class="logo">Portfolio</a>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#projects">Projects</a></li>
+                    <li><a href="#skills">Skills</a></li>
+                    <li><a href="#experience">Experience</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="particles" id="particles"></div>
+        
+        <div class="hero-content">
+            <div class="hero-update">
+                ✨ 2024년 최신 AI 프로젝트 포트폴리오가 업데이트되었습니다
+            </div>
+            
+            <h1 class="hero-title">Flow</h1>
+            
+            <p class="hero-subtitle">
+                인공지능과 임베디드 시스템이 만나는 곳,<br>
+                차세대 기술 혁신의 새로운 흐름
+            </p>
+            
+            <p class="hero-description">
+                딥러닝, 컴퓨터 비전, IoT를 결합한 스마트 솔루션을 개발하며,<br>
+                끊임없는 학습과 도전으로 기술의 경계를 확장해 나갑니다.
+            </p>
+            
+            <div class="hero-cta">
+                <a href="#projects" class="btn btn-primary">프로젝트 탐험하기</a>
+                <a href="#contact" class="btn btn-secondary">협업 문의하기</a>
+            </div>
+            
+            <div class="tech-showcase">
+                <span class="tech-item">🧠 Machine Learning</span>
+                <span class="tech-item">🔧 Embedded Systems</span>
+                <span class="tech-item">📡 IoT Development</span>
+                <span class="tech-item">🎯 Computer Vision</span>
+                <span class="tech-item">⚡ Edge Computing</span>
+                <span class="tech-item">🚀 Real-time AI</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about-section">
+        <div class="about-container">
+            <div class="about-content animate-on-scroll">
+                <h2>AI 개발자와 함께<br>만들어가는 미래</h2>
+                <p>
+                    인공지능과 임베디드 시스템의 융합을 통해 현실 세계의 문제를 해결하는 것이 저의 열정입니다. 
+                    최신 딥러닝 기술부터 하드웨어 최적화까지, 전 스택을 아우르는 개발 경험을 바탕으로 혁신적인 솔루션을 만들어갑니다.
+                </p>
+                <p>
+                    Google의 최첨단 생성형 AI 모델들과 함께 작업하며, 
+                    실시간 영상처리, 자율주행, 스마트 홈 시스템 등 다양한 영역에서 
+                    사용자 중심의 AI 서비스를 구현하고 있습니다.
+                </p>
+                <p>
+                    끊임없는 학습과 실험을 통해 AI 기술의 가능성을 탐구하고, 
+                    실용적이고 확장 가능한 시스템 구축에 집중하고 있습니다.
+                </p>
+                
+                <div class="about-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">50+</span>
+                        <span class="stat-label">완료된 AI 프로젝트</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">3년+</span>
+                        <span class="stat-label">개발 경험</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">15+</span>
+                        <span class="stat-label">기술 스택</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">100%</span>
+                        <span class="stat-label">학습 열정</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="about-visual animate-on-scroll">
+                <div class="code-animation" id="codeAnimation">
+                    # AI 모델 학습 중...
+                    import tensorflow as tf
+                    import numpy as np
+                    
+                    model = tf.keras.Sequential([
+                        tf.keras.layers.Dense(128, activation='relu'),
+                        tf.keras.layers.Dropout(0.2),
+                        tf.keras.layers.Dense(10, activation='softmax')
+                    ])
+                    
+                    model.compile(
+                        optimizer='adam',
+                        loss='categorical_crossentropy',
+                        metrics=['accuracy']
+                    )
+                    
+                    # 실시간 데이터 처리
+                    for epoch in range(100):
+                        model.fit(X_train, y_train, validation_split=0.2)
+                        print(f"Epoch {epoch+1}/100 완료")
+                    
+                    # 임베디드 시스템 배포 준비
+                    model.save('optimized_model.tflite')
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="projects-section">
+        <h2 class="section-title animate-on-scroll">혁신적인<br>프로젝트들</h2>
+        <p class="section-subtitle animate-on-scroll">
+            AI와 IoT 기술을 활용하여 현실 문제를 해결하는 창의적인 솔루션들을 소개합니다.<br>
+            각 프로젝트는 사용자 경험과 기술적 우수성을 모두 고려하여 설계되었습니다.
+        </p>
+        
+        <div class="projects-grid">
+            <div class="project-card animate-on-scroll">
+                <div class="project-icon">🤖</div>
+                <h3 class="project-title">Smart Home AI Assistant</h3>
+                <p class="project-description">
+                    음성 인식, 컴퓨터 비전, 자연어 처리를 결합한 차세대 지능형 홈 자동화 시스템. 
+                    사용자의 생활 패턴을 딥러닝으로 학습하고 예측하여 완벽한 맞춤형 환경을 제공합니다.
+                </p>
+                <ul class="project-features">
+                    <li>실시간 음성 명령 처리 (99.5% 정확도)</li>
+                    <li>컴퓨터 비전 기반 행동 인식</li>
+                    <li>IoT 디바이스 통합 제어</li>
+                    <li>에너지 효율성 30% 개선</li>
+                    <li>프라이버시 보호 로컬 처리</li>
+                </ul>
+                <div class="tech-tags">
+                    <span class="tech-tag">Python</span>
+                    <span class="tech-tag">TensorFlow</span>
+                    <span class="tech-tag">OpenCV</span>
+                    <span class="tech-tag">Raspberry Pi 4</span>
+                    <span class="tech-tag">MQTT</span>
+                    <span class="tech-tag">Docker</span>
+                </div>
+                <div class="project-links">
+                    <a href="#" class="project-link">라이브 데모 →</a>
+                    <a href="#" class="project-link">GitHub →</a>
+                    <a href="#" class="project-link">상세 문서 →</a>
+                </div>
+            </div>
+
+            <div class="project-card animate-on-scroll">
+                <div class="project-icon">📡</div>
+                <h3 class="project-title">Large-Scale IoT Sensor Network</h3>
+                <p class="project-description">
+                    LoRaWAN 기반의 대규모 저전력 무선 센서 네트워크로 스마트 시티를 위한 
+                    실시간 환경 모니터링과 AI 기반 예측 분석 시스템을 구현했습니다.
+                </p>
+                <ul class="project-features">
+                    <li>1000+ 센서 노드 동시 관리</li>
+                    <li>배터리 수명 5년 이상 보장</li>
+                    <li>실시간 이상 감지 및 알림</li>
+                    <li>예측적 유지보수 시스템</li>
+                    <li>클라우드 기반 데이터 분석</li>
+                </ul>
+                <div class="tech-tags">
+                    <span class="tech-tag">C++</span>
+                    <span class="tech-tag">LoRaWAN</span>
+                    <span class="tech-tag">Node.js</span>
+                    <span class="tech-tag">MongoDB</span>
+                    <span class="tech-tag">AWS IoT Core</span>
+                    <span class="tech-tag">Grafana</span>
+                </div>
+                <div class="project-links">
+                    <a href="#" class="project-link">라이브 데모 →</a>
+                    <a href="#" class="project-link">GitHub →</a>
+                    <a href="#" class="project-link">기술 블로그 →</a>
+                </div>
+            </div>
+
+            <div class="project-card animate-on-scroll">
+                <div class="project-icon">🚗</div>
+                <h3 class="project-title">Autonomous Vehicle System</h3>
+                <p class="project-description">
+                    YOLO v8 객체 인식, SLAM 기반 맵핑, A* 경로 계획을 통합한 
+                    완전 자율주행 차량 프로토타입 시스템을 개발했습니다.
+                </p>
+                <ul class="project-features">
+                    <li>실시간 객체 감지 (60 FPS)</li>
+                    <li>동적 경로 계획 및 최적화</li>
+                    <li>다중 센서 융합 (카메라, LiDAR, IMU)</li>
+                    <li>안전 거리 자동 유지</li>
+                    <li>엣지 디바이스 최적화</li>
+                </ul>
+                <div class="tech-tags">
+                    <span class="tech-tag">PyTorch</span>
+                    <span class="tech-tag">ROS2</span>
+                    <span class="tech-tag">NVIDIA Jetson AGX</span>
+                    <span class="tech-tag">LiDAR</span>
+                    <span class="tech-tag">CUDA</span>
+                    <span class="tech-tag">OpenCV</span>
+                </div>
+                <div class="project-links">
+                    <a href="#" class="project-link">시연 영상 →</a>
+                    <a href="#" class="project-link">GitHub →</a>
+                    <a href="#" class="project-link">논문 →</a>
+                </div>
+            </div>
+
+            <div class="project-card animate-on-scroll">
+                <div class="project-icon">💊</div>
+                <h3 class="project-title">AI-Powered Health Monitor</h3>
+                <p class="project-description">
+                    웨어러블 센서 데이터를 실시간으로 AI 분석하여 건강 이상 징후를 
+                    조기에 감지하고 개인 맞춤형 건강 관리 솔루션을 제공합니다.
+                </p>
+                <ul class="project-features">
+                    <li>24시간 연속 생체 신호 모니터링</li>
+                    <li>이상 패턴 조기 감지 (95% 정확도)</li>
+                    <li>개인 맞춤형 건강 조언</li>
+                    <li>응급 상황 자동 알림</li>
+                    <li>의료진과 데이터 공유</li>
+                </ul>
+                <div class="tech-tags">
+                    <span class="tech-tag">Python</span>
+                    <span class="tech-tag">Scikit-learn</span>
+                    <span class="tech-tag">ESP32</span>
+                    <span class="tech-tag">Flutter</span>
+                    <span class="tech-tag">Firebase</span>
+                    <span class="tech-tag">TensorFlow Lite</span>
+                </div>
+                <div class="project-links">
+                    <a href="#" class="project-link">앱 다운로드 →</a>
+                    <a href="#" class="project-link">GitHub →</a>
+                    <a href="#" class="project-link">임상 시험 결과 →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section id="skills" class="skills-section">
+        <div class="skills-container">
+            <h2 class="section-title animate-on-scroll">기술 스택</h2>
+            <p class="section-subtitle animate-on-scroll">
+                AI부터 임베디드 시스템까지, 풀스택 기술력으로 완벽한 솔루션을 제공합니다.<br>
+                지속적인 학습을 통해 최신 기술 트렌드를 따라잡고 있습니다.
+            </p>
+            
+            <div class="skills-grid">
+                <div class="skill-category animate-on-scroll">
+                    <h3>🧠 AI & Machine Learning</h3>
+                    <div class="skill-items">
+                        <span class="skill-item">Python</span>
+                        <span class="skill-item">TensorFlow</span>
+                        <span class="skill-item">PyTorch</span>
+                        <span class="skill-item">OpenCV</span>
+                        <span class="skill-item">Scikit-learn</span>
+                        <span class="skill-item">Keras</span>
+                        <span class="skill-item">CUDA</span>
+                        <span class="skill-item">NumPy</span>
+                        <span class="skill-item">Pandas</span>
+                        <span class="skill-item">Jupyter</span>
+                    </div>
+                </div>
+
+                <div class="skill-category animate-on-scroll">
+                    <h3>🔧 Embedded Systems</h3>
+                    <div class="skill-items">
+                        <span class="skill-item">C/C++</span>
+                        <span class="skill-item">Arduino</span>
+                        <span class="skill-item">Raspberry Pi</span>
+                        <span class="skill-item">ESP32/ESP8266</span>
+                        <span class="skill-item">STM32</span>
+                        <span class="skill-item">FreeRTOS</span>
+                        <span class="skill-item">I2C/SPI/UART</span>
+                        <span class="skill-item">PCB Design</span>
+                        <span class="skill-item">Altium Designer</span>
+                        <span class="skill-item">KiCad</span>
+                    </div>
+                </div>
+
+                <div class="skill-category animate-on-scroll">
+                    <h3>📡 IoT & Communication</h3>
+                    <div class="skill-items">
+                        <span class="skill-item">MQTT</span>
+                        <span class="skill-item">LoRaWAN</span>
+                        <span class="skill-item">WiFi</span>
+                        <span class="skill-item">Bluetooth LE</span>
+                        <span class="skill-item">Zigbee</span>
+                        <span class="skill-item">5G/LTE</span>
+                        <span class="skill-item">Edge Computing</span>
+                        <span class="skill-item">AWS IoT</span>
+                        <span class="skill-item">Google Cloud IoT</span>
+                        <span class="skill-item">Azure IoT</span>
+                    </div>
+                </div>
+
+                <div class="skill-category animate-on-scroll">
+                    <h3>💻 Development & Cloud</h3>
+                    <div class="skill-items">
+                        <span class="skill-item">Git</span>
+                        <span class="skill-item">Docker</span>
+                        <span class="skill-item">Kubernetes</span>
+                        <span class="skill-item">Linux</span>
+                        <span class="skill-item">AWS</span>
+                        <span class="skill-item">Node.js</span>
+                        <span class="skill-item">React</span>
+                        <span class="skill-item">MongoDB</span>
+                        <span class="skill-item">PostgreSQL</span>
+                        <span class="skill-item">Redis</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Experience Timeline -->
+    <section id="experience" class="experience-section">
+        <h2 class="section-title animate-on-scroll">경험 &<br>성장 과정</h2>
+        <p class="section-subtitle animate-on-scroll">
+            지속적인 학습과 실전 경험을 통해 AI와 임베디드 분야의 전문성을 쌓아왔습니다.
+        </p>
+        
+        <div class="timeline">
+            <div class="timeline-item animate-on-scroll">
+                <div class="timeline-content">
+                    <div class="timeline-date">2024 - 현재</div>
+                    <h3 class="timeline-title">AI 시스템 개발자</h3>
+                    <div class="timeline-company">프리랜서</div>
+                    <p class="timeline-description">
+                        다양한 스타트업과 기업을 위한 맞춤형 AI 솔루션 개발. 
+                        실시간 영상 처리, 자연어 처리, IoT 시스템 통합 전문.
+                        월평균 3-5개의 프로젝트를 성공적으로 완료하고 있습니다.
+                    </p>
+                </div>
+            </div>
+
+            <div class="timeline-item animate-on-scroll">
+                <div class="timeline-content">
+                    <div class="timeline-date">2023 - 2024</div>
+                    <h3 class="timeline-title">임베디드 AI 연구원</h3>
+                    <div class="timeline-company">테크 스타트업</div>
+                    <p class="timeline-description">
+                        엣지 디바이스를 위한 경량화 AI 모델 최적화 연구 및 개발. 
+                        TensorFlow Lite, ONNX Runtime을 활용한 모델 압축 기술 연구. 
+                        임베디드 시스템에서 실시간 추론 성능을 50% 향상시켰습니다.
+                    </p>
+                </div>
+            </div>
+
+            <div class="timeline-item animate-on-scroll">
+                <div class="timeline-content">
+                    <div class="timeline-date">2022 - 2023</div>
+                    <h3 class="timeline-title">IoT 시스템 개발자</h3>
+                    <div class="timeline-company">스마트팜 솔루션 회사</div>
+                    <p class="timeline-description">
+                        농업용 IoT 센서 네트워크 설계 및 구현. 
+                        LoRaWAN 기반 장거리 통신 시스템 개발. 
+                        데이터 수집부터 클라우드 분석까지 전체 파이프라인 구축 경험.
+                    </p>
+                </div>
+            </div>
+
+            <div class="timeline-item animate-on-scroll">
+                <div class="timeline-content">
+                    <div class="timeline-date">2021 - 2022</div>
+                    <h3 class="timeline-title">AI 학습 & 프로젝트</h3>
+                    <div class="timeline-company">독학 및 온라인 코스</div>
+                    <p class="timeline-description">
+                        머신러닝, 딥러닝 이론 학습 및 실습 프로젝트 진행. 
+                        Coursera, Udacity AI 나노디그리 과정 수료. 
+                        Kaggle 대회 참여를 통한 실전 경험 축적.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact-section">
+        <div class="contact-container">
+            <h2 class="contact-title animate-on-scroll">함께 만들어요</h2>
+            <p class="contact-subtitle animate-on-scroll">
+                혁신적인 AI 프로젝트나 임베디드 시스템 개발에 관심이 있으시나요?<br>
+                새로운 도전과 협업 기회를 언제든 환영합니다.
+            </p>
+            
+            <div class="contact-links">
+                <a href="mailto:developer@example.com" class="contact-link animate-on-scroll">
+                    <div class="contact-icon">📧</div>
+                    <div class="contact-text">이메일</div>
+                    <div class="contact-description">프로젝트 문의 및 협업 제안</div>
+                </a>
+                
+                <a href="https://github.com/yourusername" class="contact-link animate-on-scroll">
+                    <div class="contact-icon">💻</div>
+                    <div class="contact-text">GitHub</div>
+                    <div class="contact-description">오픈소스 프로젝트 및 코드</div>
+                </a>
+                
+                <a href="https://linkedin.com/in/yourprofile" class="contact-link animate-on-scroll">
+                    <div class="contact-icon">💼</div>
+                    <div class="contact-text">LinkedIn</div>
+                    <div class="contact-description">전문적인 네트워킹</div>
+                </a>
+                
+                <a href="tel:+82-10-0000-0000" class="contact-link animate-on-scroll">
+                    <div class="contact-icon">📱</div>
+                    <div class="contact-text">전화</div>
+                    <div class="contact-description">즉시 상담 및 미팅</div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="#home">Home</a>
+                <a href="#about">About</a>
+                <a href="#projects">Projects</a>
+                <a href="#skills">Skills</a>
+                <a href="#experience">Experience</a>
+                <a href="#contact">Contact</a>
+            </div>
+            <p class="footer-text">
+                © 2024 AI & Embedded Developer Portfolio. 
+                혁신적인 기술로 더 나은 미래를 만들어갑니다.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Custom Cursor
+        const cursor = document.querySelector('.cursor');
+        const cursorFollower = document.querySelector('.cursor-follower');
+        
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+            
+            setTimeout(() => {
+                cursorFollower.style.left = e.clientX - 20 + 'px';
+                cursorFollower.style.top = e.clientY - 20 + 'px';
+            }, 100);
+        });
+
+        // Cursor interactions
+        const interactiveElements = document.querySelectorAll('a, button, .btn, .skill-item, .project-card, .contact-link');
+        
+        interactiveElements.forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                cursor.style.transform = 'scale(1.5)';
+                cursorFollower.style.transform = 'scale(1.5)';
+                cursor.style.backgroundColor = 'rgba(52, 168, 83, 0.8)';
+                cursorFollower.style.borderColor = 'rgba(52, 168, 83, 0.6)';
+            });
+            
+            el.addEventListener('mouseleave', () => {
+                cursor.style.transform = 'scale(1)';
+                cursorFollower.style.transform = 'scale(1)';
+                cursor.style.backgroundColor = 'rgba(66, 133, 244, 0.6)';
+                cursorFollower.style.borderColor = 'rgba(66, 133, 244, 0.3)';
+            });
+        });
+
+        // Smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Scroll progress bar
+        window.addEventListener('scroll', () => {
+            const scrollProgress = document.querySelector('.scroll-progress');
+            const scrollTop = window.pageYOffset;
+            const docHeight = document.body.offsetHeight - window.innerHeight;
+            const scrollPercent = (scrollTop / docHeight) * 100;
+            scrollProgress.style.width = scrollPercent + '%';
+        });
+
+        // Header background change on scroll
+        const header = document.getElementById('header');
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 100) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // Scroll animations with Intersection Observer
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animated');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.animate-on-scroll').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Parallax effect for floating shapes and particles
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            
+            // Parallax for background elements
+            const parallaxElements = document.querySelectorAll('.animated-bg::before');
+            parallaxElements.forEach((element, index) => {
+                const speed = (index + 1) * 0.05;
+                element.style.transform = `translate3d(0, ${scrolled * speed}px, 0)`;
+            });
+        });
+
+        // Dynamic particles generation
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            
+            // Random properties
+            const size = Math.random() * 6 + 2;
+            const left = Math.random() * 100;
+            const animationDuration = Math.random() * 20 + 15;
+            const delay = Math.random() * 5;
+            
+            particle.style.width = size + 'px';
+            particle.style.height = size + 'px';
+            particle.style.left = left + '%';
+            particle.style.animationDuration = animationDuration + 's';
+            particle.style.animationDelay = delay + 's';
+            
+            // Random colors
+            const colors = [
+                'rgba(66, 133, 244, 0.4)',
+                'rgba(52, 168, 83, 0.4)',
+                'rgba(251, 188, 4, 0.4)',
+                'rgba(234, 67, 53, 0.4)',
+                'rgba(255, 255, 255, 0.3)'
+            ];
+            particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+            particle.style.animation = `particleFloat ${animationDuration}s linear infinite`;
+            particle.style.animationDelay = delay + 's';
+            
+            return particle;
+        }
+
+        // Add particles to hero section
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 50; i++) {
+            particlesContainer.appendChild(createParticle());
+        }
+
+        // Code animation in about section
+        const codeLines = [
+            "# AI 모델 초기화 중...",
+            "import tensorflow as tf",
+            "import numpy as np",
+            "from sklearn.model_selection import train_test_split",
+            "",
+            "# 신경망 아키텍처 설계",
+            "model = tf.keras.Sequential([",
+            "    tf.keras.layers.Conv2D(64, (3, 3), activation='relu'),",
+            "    tf.keras.layers.MaxPooling2D(2, 2),",
+            "    tf.keras.layers.Conv2D(128, (3, 3), activation='relu'),",
+            "    tf.keras.layers.GlobalAveragePooling2D(),",
+            "    tf.keras.layers.Dense(256, activation='relu'),",
+            "    tf.keras.layers.Dropout(0.3),",
+            "    tf.keras.layers.Dense(10, activation='softmax')",
+            "])",
+            "",
+            "# 모델 컴파일",
+            "model.compile(",
+            "    optimizer=tf.keras.optimizers.Adam(0.001),",
+            "    loss='categorical_crossentropy',",
+            "    metrics=['accuracy', 'top_5_accuracy']",
+            ")",
+            "",
+            "# 데이터 전처리",
+            "X_train, X_val, y_train, y_val = train_test_split(",
+            "    X, y, test_size=0.2, random_state=42",
+            ")",
+            "",
+            "# 모델 훈련 시작",
+            "history = model.fit(",
+            "    X_train, y_train,",
+            "    batch_size=32,",
+            "    epochs=100,",
+            "    validation_data=(X_val, y_val),",
+            "    callbacks=[",
+            "        tf.keras.callbacks.EarlyStopping(patience=10),",
+            "        tf.keras.callbacks.ReduceLROnPlateau()",
+            "    ]",
+            ")",
+            "",
+            "# 임베디드 배포용 최적화",
+            "converter = tf.lite.TFLiteConverter.from_keras_model(model)",
+            "converter.optimizations = [tf.lite.Optimize.DEFAULT]",
+            "tflite_model = converter.convert()",
+            "",
+            "# 모델 저장",
+            "with open('optimized_model.tflite', 'wb') as f:",
+            "    f.write(tflite_model)",
+            "",
+            "print('✅ AI 모델 훈련 및 최적화 완료!')",
+            "print(f'📊 최종 정확도: {history.history[\"val_accuracy\"][-1]:.4f}')",
+            "print('🚀 임베디드 시스템 배포 준비 완료')"
+        ];
+
+        let codeIndex = 0;
+        const codeAnimation = document.getElementById('codeAnimation');
+        
+        function typeCode() {
+            if (codeIndex < codeLines.length) {
+                const currentLines = codeLines.slice(0, codeIndex + 1);
+                codeAnimation.textContent = currentLines.join('\n');
+                codeIndex++;
+                
+                // Add cursor effect
+                if (codeIndex % 5 === 0) {
+                    codeAnimation.textContent += '\n█';
+                    setTimeout(() => {
+                        codeAnimation.textContent = codeAnimation.textContent.replace('█', '');
+                    }, 500);
+                }
+                
+                setTimeout(typeCode, Math.random() * 200 + 100);
+            } else {
+                // Reset animation
+                setTimeout(() => {
+                    codeIndex = 0;
+                    typeCode();
+                }, 3000);
+            }
+        }
+
+        // Start code animation when about section is in view
+        const aboutSection = document.querySelector('.about-section');
+        const codeObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => typeCode(), 1000);
+                    codeObserver.unobserve(entry.target);
+                }
+            });
+        });
+        codeObserver.observe(aboutSection);
+
+        // Enhanced project card interactions
+        document.querySelectorAll('.project-card').forEach((card, index) => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-20px) scale(1.03)';
+                this.style.zIndex = '10';
+                
+                // Add glow effect
+                this.style.boxShadow = `0 50px 100px rgba(66, 133, 244, 0.3), 
+                                       0 0 50px rgba(66, 133, 244, 0.2)`;
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(-15px) scale(1.02)';
+                this.style.zIndex = '1';
+                this.style.boxShadow = '0 40px 80px rgba(0, 0, 0, 0.4)';
+            });
+
+            // Stagger animation on scroll
+            card.style.animationDelay = (index * 0.2) + 's';
+        });
+
+        // Skill item advanced interactions
+        document.querySelectorAll('.skill-item').forEach(item => {
+            item.addEventListener('click', function() {
+                // Create ripple effect
+                const ripple = document.createElement('span');
+                ripple.classList.add('ripple');
+                ripple.style.position = 'absolute';
+                ripple.style.borderRadius = '50%';
+                ripple.style.background = 'rgba(255, 255, 255, 0.3)';
+                ripple.style.transform = 'scale(0)';
+                ripple.style.animation = 'rippleEffect 0.6s linear';
+                ripple.style.left = '50%';
+                ripple.style.top = '50%';
+                ripple.style.width = ripple.style.height = '100px';
+                ripple.style.marginLeft = ripple.style.marginTop = '-50px';
+                
+                this.style.position = 'relative';
+                this.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+                
+                // Scale animation
+                this.style.transform = 'translateY(-6px) scale(1.1)';
+                setTimeout(() => {
+                    this.style.transform = 'translateY(-4px) scale(1.05)';
+                }, 150);
+            });
+        });
+
+        // Add ripple effect CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes rippleEffect {
+                to {
+                    transform: scale(2);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Contact links enhanced interactions
+        document.querySelectorAll('.contact-link').forEach(link => {
+            link.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-15px) scale(1.08)';
+                
+                // Add magnetic effect
+                this.addEventListener('mousemove', handleMagnetic);
+            });
+            
+            link.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(-10px) scale(1.05)';
+                this.removeEventListener('mousemove', handleMagnetic);
+            });
+        });
+
+        function handleMagnetic(e) {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const deltaX = (e.clientX - centerX) * 0.1;
+            const deltaY = (e.clientY - centerY) * 0.1;
+            
+            e.currentTarget.style.transform = `translateY(-15px) scale(1.08) translate(${deltaX}px, ${deltaY}px)`;
+        }
+
+        // Loading animation
+        window.addEventListener('load', function() {
+            // Animate elements on page load
+            const heroElements = document.querySelectorAll('.hero-update, .hero-title, .hero-subtitle, .hero-description, .hero-cta, .tech-showcase');
+            heroElements.forEach((el, index) => {
+                el.style.animation = `fadeInUp 1s ease ${0.2 + index * 0.2}s forwards`;
+            });
+        });
+
+        // Mobile touch interactions
+        if ('ontouchstart' in window) {
+            document.querySelectorAll('.project-card, .skill-item, .contact-link').forEach(el => {
+                el.addEventListener('touchstart', function() {
+                    this.style.transform = this.style.transform.replace('scale(1)', 'scale(0.98)');
+                });
+                
+                el.addEventListener('touchend', function() {
+                    setTimeout(() => {
+                        this.style.transform = this.style.transform.replace('scale(0.98)', 'scale(1)');
+                    }, 150);
+                });
+            });
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Tab') {
+                document.body.classList.add('keyboard-navigation');
+            }
+        });
+
+        document.addEventListener('mousedown', function() {
+            document.body.classList.remove('keyboard-navigation');
+        });
+
+        // Performance optimization - throttle scroll events
+        let ticking = false;
+        function updateScrollEffects() {
+            // Update scroll progress
+            const scrollProgress = document.querySelector('.scroll-progress');
+            const scrollTop = window.pageYOffset;
+            const docHeight = document.body.offsetHeight - window.innerHeight;
+            const scrollPercent = (scrollTop / docHeight) * 100;
+            scrollProgress.style.width = scrollPercent + '%';
+            
+            // Update header
+            if (scrollTop > 100) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+            
+            ticking = false;
+        }
+
+        window.addEventListener('scroll', function() {
+            if (!ticking) {
+                requestAnimationFrame(updateScrollEffects);
+                ticking = true;
+            }
+        });
+
+        console.log(`
+        🚀 포트폴리오 사이트 로드 완료!
+        
+        ✨ 주요 기능:
+        - 커스텀 커서 인터랙션
+        - 스크롤 기반 애니메이션
+        - 동적 파티클 시스템
+        - 실시간 코드 타이핑 애니메이션
+        - 자기효과(Magnetic Effect)
+        - 리플 효과 터치 인터랙션
+        
+        💡 개발자: AI & 임베디드 시스템 전문가
+        🔧 기술 스택: HTML5, CSS3, Vanilla JavaScript
+        🎨 디자인: Google Flow 스타일
+        `);
+    </script>
+</body>
+</html>
